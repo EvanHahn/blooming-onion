@@ -59,7 +59,7 @@ tick = (t) ->
 
   zctx.keepInView
     coordinates: squares
-    padding: 3
+    padding: 1
 
   appendTo = Math.floor(Math.random() * squares.length)
 
