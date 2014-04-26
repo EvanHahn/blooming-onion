@@ -4,7 +4,29 @@ canvas.height = innerHeight
 ctx = canvas.getContext("2d")
 zctx = new ZoomContext(ctx)
 
+grid = {}
 squares = []
+lowest = { x: 0, y: 0 }
+highest = { x: 0, y: 0 }
+
+at = (x, y) -> grid["#{x},#{y}"]
+
+addSquare = (square) ->
+
+  x = square.x
+  y = square.y
+
+  squares.push square
+  grid["#{x},#{y}"] = square
+
+  if lowest.x > x
+    lowest.x = x
+  if lowest.y > y
+    lowest.y = y
+  if highest.x < x
+    highest.x = x
+  if highest.y < y
+    highest.y = y
 
 class Square
 
@@ -16,40 +38,29 @@ class Square
 
   placeAdjacent: ->
 
-    up = yes
-    down = yes
-    left = yes
-    right = yes
+    results = []
+    if not at(@x - 1, @y)
+      results.push new Square(@x - 1, @y)
+    if not at(@x + 1, @y)
+      results.push new Square(@x + 1, @y)
+    if not at(@x, @y - 1)
+      results.push new Square(@x, @y - 1)
+    if not at(@x, @y + 1)
+      results.push new Square(@x, @y + 1)
 
-    for square in squares
+    result = results.sample()
 
-      continue if this is square
-
-      if (square.x - 1 is @x) and (square.y is @y)
-        right = no
-      else if (square.x + 1 is @x) and (square.y is @y)
-        left = no
-      else if (square.y - 1 is @y) and (square.x is @x)
-        down = no
-      else if (square.y + 1 is @y) and (square.x is @x)
-        up = no
-
-    if up
-      squares.push new Square(@x, @y - 1)
-    else if down
-      squares.push new Square(@x, @y + 1)
-    else if left
-      squares.push new Square(@x - 1, @y)
-    else if right
-      squares.push new Square(@x + 1, @y)
-
-    return up or down or left or right
+    if result
+      addSquare result
+      return yes
+    else
+      return no
 
   draw: (zctx) ->
     zctx.fillStyle = @color
     zctx.fillRect(@x - 0.5, @y - 0.5, 1, 1)
 
-squares.push new Square(0, 0)
+addSquare new Square(0, 0)
 
 second = -1
 
@@ -58,7 +69,7 @@ tick = (t) ->
   zctx.clear()
 
   zctx.keepInView
-    coordinates: squares
+    coordinates: [lowest, highest]
     padding: 1
 
   appendTo = Math.floor(Math.random() * squares.length)
