@@ -1,3 +1,5 @@
+/* global TWEEN, requestAnimationFrame */
+
 (function() {
 
   // utility methods
@@ -92,24 +94,75 @@
   // zoom-related methods
   // ====================
 
-  ZoomContext.prototype.translate = function translate(x, y) {
-    this.center.x = x;
-    this.center.y = y;
+  ZoomContext.prototype.translate = function translate(x, y, options) {
+    options = options || {};
+    if (!options.tween) {
+      this.center.x = x;
+      this.center.y = y;
+    } else {
+      var tweenTime = options.tween.time || 1000;
+      var tweenEasing = options.tween.easing || TWEEN.Easing.Elastic.InOut;
+      new TWEEN.Tween(this.center)
+        .to({ x: x, y: y }, tweenTime)
+        .easing(tweenEasing)
+        .start();
+      var animate = function () {
+        TWEEN.update();
+        requestAnimationFrame(animate);
+      };
+      animate();
+    }
   };
 
-  ZoomContext.prototype.zoomToSize = function zoomToSize(s) {
-    this.zoom = Math.min(this.width, this.height) / s;
+  ZoomContext.prototype.zoomToSize = function zoomToSize(s, options) {
+    options = options || {};
+    var desiredZoom = Math.min(this.width, this.height) / s;
+    if (!options.tween) {
+      this.zoom = desiredZoom;
+    } else {
+      var tweenTime = options.tween.time || 1000;
+      var tweenEasing = options.tween.easing || TWEEN.Easing.Back.Out;
+      new TWEEN.Tween(this)
+        .to({ zoom: desiredZoom }, tweenTime)
+        .easing(tweenEasing)
+        .start();
+      var animate = function () {
+        TWEEN.update();
+        requestAnimationFrame(animate);
+      };
+      animate();
+    }
   };
 
   ZoomContext.prototype.keepInView = function keepInView(options) {
+
     var padding = options.padding || 0;
     var xs = options.coordinates.map(function(c) { return c.x; });
     var ys = options.coordinates.map(function(c) { return c.y; });
     var min = { x: arrayMin(xs) - padding, y: arrayMin(ys) - padding };
     var max = { x: arrayMax(xs) + padding, y: arrayMax(ys) + padding };
-    this.center.x = (min.x + max.x) / 2;
-    this.center.y = (min.y + max.y) / 2;
-    this.zoomToSize(Math.max(max.x - min.x, max.y - min.y));
+
+    var centerX;
+    var centerY;
+    if (options.forceCenter) {
+      centerX = options.forceCenter.x;
+      centerY = options.forceCenter.y;
+    } else {
+      centerX = (min.x + max.y) / 2;
+      centerY = (min.y + max.y) / 2;
+    }
+    var zoomSize = Math.max(max.x - min.x, max.y - min.y);
+
+    if (!options.tween) {
+      this.translate(centerX, centerY);
+      this.zoomToSize(zoomSize);
+    } else {
+      var centerTween = options.tween.center || options.tween;
+      var zoomTween = options.tween.zoom || options.tween;
+      this.translate(centerX, centerY, { tween: centerTween });
+      this.zoomToSize(zoomSize, { tween: zoomTween });
+    }
+
   };
 
   // define a bunch of the methods

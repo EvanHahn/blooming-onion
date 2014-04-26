@@ -61,19 +61,30 @@ class Square
     zctx.fillRect(@x - 0.5, @y - 0.5, 1, 1)
 
 addSquare new Square(0, 0)
+zctx.keepInView
+  coordinates: [lowest, highest]
+  padding: 1
 
 second = -1
 
 tick = (t) ->
 
+  onSecond = no
+  if Math.floor(t / 1000) > second
+    onSecond = yes
+    second += 1
+
   zctx.clear()
 
-  zctx.keepInView
-    coordinates: [lowest, highest]
-    padding: 1
+  if onSecond
+    zctx.keepInView
+      coordinates: [lowest, highest]
+      forceCenter: { x: 0, y: 0 }
+      padding: 3
+      tween:
+        time: 1000
 
   appendTo = Math.floor(Math.random() * squares.length)
-
   for square, index in squares
     square.draw(zctx)
     if index is appendTo
