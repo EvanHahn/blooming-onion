@@ -58,7 +58,7 @@ class Square
   draw: (zctx) ->
     @age += 0.008
 
-    zctx.fillStyle = Spectra(@color.hex()).saturation(@age - 1).hex()
+    ctx.fillStyle = Spectra(@color.hex()).saturation(@age - 1).rgbaString()
 
     size = Math.min(@age, 0.9)
     zctx.fillRect(@x - (size / 2), @y - (size / 2), size, size)
@@ -88,6 +88,7 @@ tick = (t) ->
       padding: 3
       tween:
         time: 1000
+        easing: TWEEN.Easing.Linear.None
 
   appendTo = []
   Math.ceil(squares.length / 100).times ->
