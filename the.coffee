@@ -56,9 +56,9 @@ class Square
     return added
 
   draw: (zctx) ->
-    @age += 0.002
+    @age += 0.008
 
-    zctx.fillStyle = Spectra(@color.hex()).saturation(@age).rgbaString()
+    zctx.fillStyle = Spectra(@color.hex()).saturation(@age - 1).hex()
 
     size = Math.min(@age, 0.9)
     zctx.fillRect(@x - (size / 2), @y - (size / 2), size, size)
@@ -89,10 +89,13 @@ tick = (t) ->
       tween:
         time: 1000
 
-  appendTo = Math.floor(Math.random() * squares.length)
+  appendTo = []
+  Math.ceil(squares.length / 100).times ->
+    appendTo.push Math.floor(Math.random() * squares.length)
+
   for square, index in squares
     square.draw(zctx)
-    if index is appendTo
+    if (index in appendTo) and (squares.length < 10000)
       square.placeAdjacent()
 
   requestAnimationFrame tick
