@@ -38,23 +38,22 @@ class Square
 
   placeAdjacent: ->
 
-    results = []
+    added = no
+
     if not at(@x - 1, @y)
-      results.push new Square(@x - 1, @y)
+      addSquare new Square(@x - 1, @y)
+      added = yes
     if not at(@x + 1, @y)
-      results.push new Square(@x + 1, @y)
+      addSquare new Square(@x + 1, @y)
+      added = yes
     if not at(@x, @y - 1)
-      results.push new Square(@x, @y - 1)
+      addSquare new Square(@x, @y - 1)
+      added = yes
     if not at(@x, @y + 1)
-      results.push new Square(@x, @y + 1)
+      addSquare new Square(@x, @y + 1)
+      added = yes
 
-    result = results.sample()
-
-    if result
-      addSquare result
-      return yes
-    else
-      return no
+    return added
 
   draw: (zctx) ->
     zctx.fillStyle = @color
