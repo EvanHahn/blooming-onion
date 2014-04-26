@@ -31,10 +31,10 @@ addSquare = (square) ->
 class Square
 
   constructor: (@x, @y) ->
-    color = Spectra.random()
-    while color.isDark()
-      color = Spectra.random()
-    @color = color.hex()
+    @color = Spectra.random()
+    while @color.isDark()
+      @color = Spectra.random()
+    @age = 0
 
   placeAdjacent: ->
 
@@ -56,10 +56,16 @@ class Square
     return added
 
   draw: (zctx) ->
-    zctx.fillStyle = @color
-    zctx.fillRect(@x - 0.5, @y - 0.5, 1, 1)
+    @age += 0.002
 
-addSquare new Square(0, 0)
+    zctx.fillStyle = Spectra(@color.hex()).saturation(@age).rgbaString()
+
+    size = Math.min(@age, 0.9)
+    zctx.fillRect(@x - (size / 2), @y - (size / 2), size, size)
+
+firstSquare = new Square(0, 0)
+firstSquare.age = 1
+addSquare firstSquare
 zctx.keepInView
   coordinates: [lowest, highest]
   padding: 1
